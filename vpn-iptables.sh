@@ -1,6 +1,17 @@
 # Your server's IP address is a.b.c.d
-ip rule add table 128 from a.b.c.d
-# Your subnet is a.b.c.0/24 and your interface is eth0
-ip route add table 128 to a.b.c.0/24 dev eth0
-# Your default gateway is x.x.x.x
-ip route add table 128 default via x.x.x.x
+HOSTNAME=$(hostname -I)
+GUESSED_IP=$(echo $HOSTNAME | gawk -F' ' '{print $1}')
+echo -e "$HOSTNAME"
+read -p "Select your public IP (It's probably $GUESSED_IP): " IP
+SUBNET=$(echo $IP | gawk -F'.' '{print $1"."$2"."$3".0"}')
+INTERFACE=$(ip -4 -o a | cut -d ' ' -f 2,7 | cut -d '/' -f 1 | grep $IP | gawk -F' ' '{print $1}')
+DEFAULT_GATEWAY=$(ip route | grep 'default via' | gawk -F' ' '{print $3}')
+echo -e "\n\t\tip rule add table 128 from $IP"
+echo -e "\t\tip route add table 128 to $SUBNET/24 dev $INTERFACE"
+echo -e "\t\tip route add table 128 default via $DEFAULT_GATEWAY\n"
+read -p "I'm about to issue these commands, are you sure you want to continue? (y/n): " SURE
+if [[ $SURE -eq 'y' ]]; then
+	ip rule add table 128 from $IP
+	ip route add table 128 to $SUBNET/24 dev $INTERFACE
+	ip route add table 128 default via $DEFAULT_GATEWAY
+fi
