@@ -1,4 +1,0 @@
-[client.gnocchi]
-        key = AQAJ0VlfAAAAABAABkQ0XJ8zvMvocX/JWst2kQ==
-        caps mon = "profile rbd"
-        caps osd = "profile rbd pool=gnocchi"
